@@ -1,169 +1,74 @@
-# claude-skill-taobao-store-designer
+# claude-skill-ecommerce-store-designer
 
-**淘宝店铺首页设计 Claude Skill** — 品牌配置驱动，模块化组合，导出 1200px 图片直接上传千牛。
+**电商店铺首页设计 Claude Skill** — 先问出图尺寸，按品牌做差异化设计，生成可视化编辑器，导出**任意平台尺寸**的图片。
 
-A Claude skill for designing Taobao store homepages — brand-configurable, modular, exports 1200px images ready for Qianniu upload.
+A platform-agnostic Claude skill for e-commerce store homepage / decoration design — it asks your export size first, produces brand-specific (non-templated) designs, generates a single-file visual editor, and exports images at whatever width your platform needs.
+
+> 适用于淘宝/千牛、抖音小店、京东、拼多多、Shopify、独立站等**任意电商平台** —— 不再写死某个平台。
+> Works for any store platform (Taobao/Qianniu, TikTok Shop, JD, Shopify, custom sites…). Not tied to one platform.
 
 ---
 
 ## 它能做什么 / What it does
 
-安装后，这个 Skill 会引导 Claude 走一套三步工作流：
+安装后，Skill 引导 Claude 走一套工作流：
 
-1. **收集品牌信息** — 品牌名、品类、风格关键词、色彩偏好、需要哪些模块
-2. **输出方案摘要** — 色彩方案、模块顺序、排版变体选择、视觉串联方式，等你确认
-3. **生成单文件 HTML 编辑器** — 在浏览器里直接改文字、换图片，导出全套 1200px PNG
+1. **调研需求** — 先问**出图尺寸**（平台 / 宽度，如 750 / 1080 / 1242 / 1440），再问品牌信息、风格、以及**这次主推 / 上架什么**（决定首页"卖什么、怎么排"）。
+2. **研究驱动的差异化设计** — 由品牌的**艺术方向 (concept)** 同时驱动配色/字体**和版面结构**；方案里每个版块都要能回指 concept 某条；内置「防脊柱趋同」自检，避免同品类千篇一律。
+3. **生成单文件 HTML 编辑器** — 左侧「添加模块」面板 + **拖拽到画布指定位置**、文字点击即改、图片点击即换、每个板块 ⚙ 调字号/行距/颜色/对齐/高度/图文比/镜像，一键导出**按你指定宽度**的整套 PNG。
 
-Once installed, the skill guides Claude through a 3-step workflow: collect brand info → propose a design plan (wait for confirmation) → generate a single-file HTML editor for in-browser editing and 1200px export.
-
-导出的图片按千牛模块顺序命名，直接上传对应模块即可。
+The skill guides Claude through: research (incl. **export size**) → concept-driven differentiated design → a single-file HTML editor for in-browser editing and export at your chosen width.
 
 ---
 
-## 千牛模块对应关系 / Qianniu Module Map
+## 核心特性 / Highlights
 
-| 千牛模块 | 需要上传的图 | 导出尺寸 |
-|---|---|---|
-| 轮播图海报 | 每张 Banner 独立导出 | 1200 × 600px |
-| 单图海报 | 系列头图、过渡图、品牌故事 | 1200 × 任意高 |
-| 多热区切图 | 分类导航图 | 1200 × 480px |
-| 店铺优惠券 | 不需要图，千牛原生模块 | — |
-| 系列主题宝贝 | 不需要图，千牛原生模块 | — |
+- 🎯 **先问尺寸，按平台出图**：内部统一按 **1440px 参考宽度**设计，导出时缩放到你指定的 `BRAND.exportWidth`（任意平台尺寸；高度 / 文件大小上限也按平台）。
+- 🧩 **组件 kit + 概念组合**：13 个导出安全的版面组件（多种 hero / 左右分栏 / 等高网格 / 错落网格 / 横向 lookbook / 色卡条 / 规格大数字 / 不对称编辑式 / 巨字陈述 / 过渡 / 品牌故事…），由 concept **组合**出每个品牌专属骨架，**不是固定模板换皮**。
+- ✏️ **可视化编辑器**：从左侧面板**拖拽插入**模块、逐板块排版/布局配置、文字与图片即点即改；所有编辑入口在**导出时自动隐藏**。
+- 🌏 **国内可用 + 字体可靠**：脚本走 BootCDN、字体走 `fonts.googleapis.cn`；并用 **FontFace** 把字体烤进导出图（html2canvas 在部分浏览器不会烤 `<link>` 注入的字体，这点踩过坑）。
+- 📐 **导出安全**：图片区一律 `background-image`（html2canvas 不支持 object-fit）、禁用高级 SVG、模块高度 200–2000px 超限拆图、压缩到 ≤2MB（可按平台调）。
 
 ---
 
-## 编辑器功能 / Editor Features
+## 工作原理 / How it works
 
-- **文字直接编辑** — 点击任意文字，光标进入，打字修改
-- **图片一键替换** — 鼠标悬停图片区域 → 点击上传产品图/模特图
-- **模块自由排序** — 悬停模块右上角出现：上移 / 下移 / 单独导出 / 删除
-- **左侧面板随时添加模块** — 可在任意位置插入新模块
+导出的不是网页，而是**图片** —— 因为大多数电商平台的移动端装修是「模块 + 图片」拼装，不吃自定义 HTML。本 skill 生成的是一个**本地设计工具**（单文件 HTML）：在浏览器里设计 → 导出图片 → 上传到你店铺的对应模块。
 
-**三种导出方式：**
-- 单模块导出 → 输出 `品牌名_模块名_1200px.png`
-- ZIP 打包 → 全部模块一次下载，不弹多次确认
-- 合并长图 → 所有模块垂直拼合成一张完整首页图
-
-所有图片自动压缩到 2MB 以内。 / All exports are automatically compressed to stay under 2MB.
+The output is **images**, not a web page — most store platforms assemble mobile homepages from "modules + images" and don't accept custom HTML. The generated single-file HTML is a **local design tool**: design in the browser, export images, upload to your store's modules.
 
 ---
 
-## 设计系统 / Design System
+## 文件结构 / Files
 
-### 模块排版变体 / Layout Variants
-
-每种模块有多种排版，Claude 根据品牌风格选择，相邻同类模块使用不同变体避免重复感。
-
-Each module type has multiple layouts. Claude picks based on brand style and alternates variants to avoid repetition.
-
-**Banner / Hero**
-- A 全出血 / Full-bleed：图铺满，渐变遮罩，文字叠底左
-- B 分屏 / Split screen：左图右文，背景色衬底
-- C 留白居中 / Centered：图约 60% 宽居中，四周大量留白
-
-**系列展示 / Series Showcase**
-- A 标题溢出 / Overflow title：系列名从上方区块延伸压住图片
-- B 左图右文 / Left photo right text
-- C 右图左文 / Right photo left text（与 B 交替）
-- D 全出血竖排 / Full-bleed vertical type
-
-**过渡条 / Divider**
-- A 细线夹字：`——— SERIES ———`
-- B 大字锚点：超大透明背景字 + 前景编号
-- C 纯色块：整行换背景色
-
-**分类导航 / Category Nav**
-- A 等高四格 / Equal columns
-- B 错落高度 / Staggered heights（高-矮-高-矮）
-- C 横向文字条 / Text-only strips
-
-**品牌故事 / Brand Story**
-- A 左图右文 / Photo left text right
-- B 大引语居中 / Large centered quote
-- C 深色全出血 / Dark full-bleed
-
-### 背景色策略 / Background Strategy
-
-**关键洞察 / Key insight**：近白或白色背景让模块边界消失，页面读起来像一个整体而不是拼凑的块。Near-white backgrounds make module boundaries disappear — the page reads as one continuous scroll.
-
-| 品牌风格 / Style | 推荐背景 / Background |
+| 文件 | 作用 |
 |---|---|
-| 极简 / 现代 | 近白 `#F8F6F3` ↔ `#EEEAE4` |
-| 中式 / 手工艺 | 暖亚麻 `#EAE0CC` ↔ `#DDD2BA` |
-| 高级 / 暗黑 | 深墨 `#1C1814` ↔ `#2A2520` |
-| 活泼 / 清新 | 品牌色 + 白色卡片交替 |
-
-### 字体预设 / Font Presets
-
-字体通过品牌配置对象管理，不写死，Claude 根据风格选择。
-
-Fonts are managed via brand config — not hardcoded. Claude picks from presets based on style keywords.
-
-| 风格 / Style | 中文 / Chinese | 英文 / English |
-|---|---|---|
-| 高级感 / 珠宝 | Noto Serif SC | Cormorant Garamond italic |
-| 活泼 / 国潮 | ZCOOL KuaiLe | DM Sans |
-| 户外 / 工装 | Noto Sans SC | Space Grotesk |
-| 复古 / 中式 | ZCOOL XiaoWei | Playfair Display |
-| 现代 / 科技 | Noto Sans SC | Inter |
-| 手工艺 / 生活 | Ma Shan Zheng | Lora |
+| `SKILL.md` | **决策层**：工作流、调研问题、concept→结构、组件 kit 用法、差异化质检清单。 |
+| `references/code-patterns.md` | **代码层（经过验证的实现）**：`BRAND` 配置、固定机器（`makeUploadable` / `renderMod`+FontFace / 导出缩放 / `expZip` / `expLong`）、13 组件 kit、编辑器外壳（左侧添加模块 + 拖拽 + 配置面板）。 |
+| `references/industry-*.md` | 行业配色 / 版式参考（服装、美妆香氛、家居食品、数码运动母婴）。 |
 
 ---
 
-## 安装方法 / Installation
+## 安装 / Install
 
-### Claude Desktop
+把整个目录放进 Claude Code / Claude Desktop 的 skills 目录（或打包成 `.skill` 文件）。当你提到「店铺装修 / 店铺首页 / banner / 详情页 / 电商装修」等需求时，Claude 会自动调用本 skill。
 
-1. 下载 / Download `taobao-store-designer.skill`
-2. 打开 Claude Desktop → 进入你的 Project → Settings
-3. 在 Skills 区域上传 `.skill` 文件
+Place this folder in your Claude skills directory (or zip it into a `.skill`). It triggers on store-decoration / homepage / banner / product-page requests.
 
-安装后，在该 Project 的任何对话里提到 **「淘宝首页」「店铺装修」「千牛」** 或 **"store homepage"**，Claude 会自动读取这个 Skill，按三步工作流执行。
-
-After installation, mention **"淘宝首页"**, **"千牛"**, **"店铺装修"**, or **"store homepage"** in any conversation in that project to trigger the workflow.
-
-### 查看 Skill 源码 / View Source
-
-`.skill` 文件本质是 ZIP 压缩包，改后缀为 `.zip` 解压，里面是 `SKILL.md`。
-
-The `.skill` file is a ZIP archive. Rename to `.zip` and extract to read `SKILL.md`.
+> `.skill` 文件本质是 ZIP，改后缀为 `.zip` 解压即可读源码。 / The `.skill` file is just a ZIP — rename to `.zip` to read the source.
 
 ---
 
-## 技术说明 / Technical Notes
+## 关键技术决策 / Key technical decisions
 
-以下是这套方案经过迭代验证的几个关键技术决策：
+经过多轮迭代验证的几个要点：
 
-**`background-image` 而不是 `<img>`**
-html2canvas 不支持 `object-fit: cover`，用 `<img>` 导出必然变形。所有图片区使用 CSS `background-image` + `background-size: cover`。
-*html2canvas does not support `object-fit: cover`. All image zones use `background-image` instead of `<img>`.*
-
-**禁止 `innerHTML +=`**
-`innerHTML +=` 会序列化重建 DOM，销毁已有节点的事件监听器，导致换图失效。全部用 `createElement` + `appendChild`。
-*`innerHTML +=` destroys event listeners on existing nodes. Always use `createElement` + `appendChild`.*
-
-**iframe 隔离确保真实 1200px 导出**
-画布预览通过 CSS `transform: scale(0.325)` 缩小到 390px 显示。导出时把模块写入隐藏 iframe，在 iframe 内以真实 1200px 渲染后截图。
-*The preview scales the 1200px design down via CSS transform. Export renders each module inside a hidden iframe at true 1200px.*
-
-**`document.fonts.ready` 等待字体**
-Google Fonts 异步加载，固定延时不可靠。用 `iDoc.fonts.ready` 确保字体实际可用后再截图。
-*Use `iDoc.fonts.ready` instead of a fixed timeout to ensure fonts are actually loaded before capture.*
-
-**高度稳定检测后再截图**
-`min-height` 的模块高度动态撑开。导出前等待 `scrollHeight` 连续 3 次相同，确认稳定。
-*Wait for `scrollHeight` to be identical 3 times in a row before capturing, to handle dynamically expanding modules.*
-
-**合并长图逐个释放内存**
-每个模块截图后立刻转为 dataURL 释放 canvas。合并时用 `Image` 对象绘制，避免多个大 canvas 同时占用内存。
-*Convert each canvas to dataURL immediately after capture, then assemble with `Image` objects to avoid OOM.*
-
----
-
-## 已知限制 / Known Limitations
-
-- 千牛自定义 HTML 模块不支持 JavaScript，所有导出为静态图片 / Qianniu does not support JS in custom HTML modules — all outputs are static images
-- 新版淘宝通用货品店的店招背景由系统控制，不支持自定义图片 / The store header background is system-controlled in new Taobao stores and cannot be customized
+- **`background-image` 而非 `<img>`** — html2canvas 不支持 `object-fit:cover`，用 `<img>` 必然变形。
+- **FontFace 烤字，而非只靠 `<link>`** — 实测部分浏览器不会把 `<link>` 注入的 web 字体烤进 html2canvas 导出（中文会变兜底字体）。改为 fetch `.cn` 的 woff2 分片 → `FontFace` 注册进导出 iframe。
+- **导出尺寸参数化** — 内部按 1440 设计，`renderMod` 导出时把 canvas 缩放到 `exportWidth`，适配任意平台。
+- **cfg 单一数据源 + 配置面板直改 DOM** — 改字号/颜色/高度等直接改 `.db` 的 inline 样式，不重建组件，用户已编辑的文字/图不丢，导出自动带上。
+- **高度稳定检测 + iframe 隔离** — 导出前等 `scrollHeight` 连续 3 次相同；模块写入隐藏 iframe 以真实宽度渲染再截图。
+- **网格/错落网格按内容自动算高** — 避免内容超过写死高度被裁切或留白条。
 
 ---
 
