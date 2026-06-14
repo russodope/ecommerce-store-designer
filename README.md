@@ -1,15 +1,27 @@
 # ecommerce-store-designer
 
-**电商店铺首页设计 agent skill** — 先问出图尺寸，按品牌做差异化设计，生成可视化编辑器，导出**任意平台尺寸**的图片。
+**中文** · [English](README.en.md)
 
-A platform-agnostic **skill for AI coding agents** to design e-commerce store homepages / decorations — it asks your export size first, produces brand-specific (non-templated) designs, generates a single-file visual editor, and exports images at whatever width your platform needs.
+**电商店铺首页设计 agent skill** — 先问出图尺寸，按品牌做差异化设计，生成可视化编辑器，导出**目标平台尺寸**的图片。
 
-> 适用于淘宝/千牛、抖音小店、京东、拼多多、Shopify、独立站等**任意电商平台**；可配合 Claude Code、Cursor、Cline、Windsurf、Codex 等**各类 coding agent** 使用 —— 不绑定平台、不绑定某个 agent。
-> Works for any store platform (Taobao, TikTok Shop, JD, Shopify, custom sites…) and with any coding agent (Claude Code, Cursor, Cline, Windsurf, Codex…).
+> 可配合 Claude Code、Cursor、Cline、Windsurf、Codex 等**各类 coding agent** 使用——不绑定平台、不绑定某个 agent。
 
 ---
 
-## 它能做什么 / What it does
+## 适用平台 / 装修模型
+
+这个 skill 产出的是**一组按指定宽度做好的版面图片**，所以它最直接适用于「**加图片/自定义模块 → 上传整张设计图**」这种装修模型的平台。不同平台模型不一样：
+
+| 平台 | 装修模型 | 适配度 |
+|---|---|---|
+| **淘宝/天猫、京东、拼多多、抖音小店** 等国内 marketplace | 后台「店铺装修」加模块（轮播 / 自定义图片 / 图文 / 热区），**上传平台指定尺寸的整图** | ✅ **直接适用** |
+| **Shopify、独立站、WooCommerce** 等主题/建站类 | 主题「区块(section)」拼装（响应式，含文字/按钮/商品），图片放进 Image banner / 图文 / 自定义 HTML 区块 | ⚠️ **部分适用**：把设计图当 **banner / 促销 / 图文区图片** 放进区块即可；但这类平台是主题区块式、响应式，不是整页堆图 |
+
+> 各平台尺寸不同（如京东轮播 1440 宽、抖音 1125×633、Shopify banner 约 1600×1050）——所以本 skill **第一步就先问你出图宽度**，再按它出图。
+
+---
+
+## 它能做什么
 
 引导你的 coding agent 走一套工作流：
 
@@ -17,13 +29,11 @@ A platform-agnostic **skill for AI coding agents** to design e-commerce store ho
 2. **研究驱动的差异化设计** — 由品牌的**艺术方向 (concept)** 同时驱动配色/字体**和版面结构**；方案里每个版块都要能回指 concept 某条；内置「防脊柱趋同」自检，避免同品类千篇一律。
 3. **生成单文件 HTML 编辑器** — 左侧「添加模块」面板 + **拖拽到画布指定位置**、文字点击即改、图片点击即换、每个板块 ⚙ 调字号/行距/颜色/对齐/高度/图文比/镜像，一键导出**按你指定宽度**的整套 PNG。
 
-Guides the agent through: research (incl. **export size**) → concept-driven differentiated design → a single-file HTML editor for in-browser editing and export at your chosen width.
-
 ---
 
-## 核心特性 / Highlights
+## 核心特性
 
-- 🎯 **先问尺寸，按平台出图**：内部统一按 **1440px 参考宽度**设计，导出时缩放到你指定的 `BRAND.exportWidth`（任意平台尺寸；高度 / 文件大小上限也按平台）。
+- 🎯 **先问尺寸，按平台出图**：内部统一按 **1440px 参考宽度**设计，导出时缩放到你指定的 `BRAND.exportWidth`（任意宽度；高度 / 文件大小上限也按平台）。
 - 🧩 **组件 kit + 概念组合**：13 个导出安全的版面组件（多种 hero / 左右分栏 / 等高网格 / 错落网格 / 横向 lookbook / 色卡条 / 规格大数字 / 不对称编辑式 / 巨字陈述 / 过渡 / 品牌故事…），由 concept **组合**出每个品牌专属骨架，**不是固定模板换皮**。
 - ✏️ **可视化编辑器**：从左侧面板**拖拽插入**模块、逐板块排版/布局配置、文字与图片即点即改；所有编辑入口在**导出时自动隐藏**。
 - 🌏 **国内可用 + 字体可靠**：脚本走 BootCDN、字体走 `fonts.googleapis.cn`；并用 **FontFace** 把字体烤进导出图。
@@ -31,15 +41,15 @@ Guides the agent through: research (incl. **export size**) → concept-driven di
 
 ---
 
-## 工作原理 / How it works
+## 工作原理
 
-导出的不是网页，而是**图片** —— 因为大多数电商平台的移动端装修是「模块 + 图片」拼装，不吃自定义 HTML。skill 生成的是一个**本地设计工具**（单文件 HTML）：在浏览器里设计 → 导出图片 → 上传到你店铺的对应模块。
+产出的不是网页，而是**图片**。在国内 marketplace，移动端「店铺装修」是模块 + 图片拼装、不吃自定义 HTML，所以你把 skill 导出的图传进对应模块即可；在 Shopify 等主题平台，则把这些图当 banner / 图文区图片放进区块。
 
-The output is **images**, not a web page — most store platforms assemble mobile homepages from "modules + images" and don't accept custom HTML. The generated single-file HTML is a **local design tool**: design in the browser, export images, upload to your store's modules.
+skill 生成的是一个**本地设计工具**（单文件 HTML）：在浏览器里设计 → 导出图片 → 上传到你店铺。
 
 ---
 
-## 文件结构 / Files
+## 文件结构
 
 | 文件 | 作用 |
 |---|---|
@@ -49,16 +59,14 @@ The output is **images**, not a web page — most store platforms assemble mobil
 
 ---
 
-## 用法 / Usage
+## 用法
 
 本质是一套 **markdown 指令 + 代码模板**，任何能读取本地文件 / 上下文的 coding agent 都能用：
 
 - **Claude Code / Claude Desktop**：下载 [`ecommerce-store-designer.skill`](./ecommerce-store-designer.skill)（或 [Releases](../../releases)）导入 skills；或把本目录放进 skills 目录。
 - **Cursor / Cline / Windsurf / Codex 等**：把 `SKILL.md` + `references/` 作为 rules / context / 附件喂给 agent，让它按 `SKILL.md` 的流程执行即可。
 
-It's just **markdown instructions + code templates** — usable by any agent that can read local files/context. For Claude, import the `.skill`; for other agents, feed `SKILL.md` + `references/` as rules/context.
-
-> `.skill` 文件本质是 ZIP，改后缀为 `.zip` 解压即可读源码。 / The `.skill` is just a ZIP — rename to `.zip` to read the source.
+> `.skill` 文件本质是 ZIP，改后缀为 `.zip` 解压即可读源码。
 
 ---
 
