@@ -211,8 +211,9 @@ async function renderMod(id){
   try{ cv=await html2canvas(inner,{scale:1,useCORS:true,allowTaint:true,backgroundColor:null,logging:false,width:1440,height:realH,windowWidth:1440,windowHeight:realH}); }
   catch(e){ console.error('renderMod',e); }
   document.body.removeChild(ifr); if(actions)actions.style.visibility='';
-  // ⭐导出缩放：把 1440 设计稿缩放到用户指定的出图宽度（exportWidth）
-  if(cv && B.exportWidth && B.exportWidth!==1440){ const oc=el('canvas'); oc.width=B.exportWidth; oc.height=Math.round(cv.height*B.exportWidth/1440); oc.getContext('2d').drawImage(cv,0,0,oc.width,oc.height); cv=oc; }
+  // ⭐导出归一化：强制把成图宽度拉到 exportWidth。用 cv.width!==exportWidth 判断（不是 !==1440）——
+  // 某些环境(浏览器缩放改 devicePixelRatio 等)下 html2canvas 返回的宽度可能 ≠1440，必须兜底纠正；高度按 canvas 自身比例算。
+  if(cv && B.exportWidth && cv.width!==B.exportWidth){ const oc=el('canvas'); oc.width=B.exportWidth; oc.height=Math.round(cv.height*B.exportWidth/cv.width); oc.getContext('2d').drawImage(cv,0,0,oc.width,oc.height); cv=oc; }
   return cv;
 }
 
